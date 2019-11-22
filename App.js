@@ -1,9 +1,44 @@
 import React from 'react';
-import { Text, View, TouchableOpacity } from 'react-native';
+import { Text, View, TouchableOpacity, Image } from 'react-native';
+import { Button } from 'react-native-elements';
 import * as Permissions from 'expo-permissions';
 import { Camera } from 'expo-camera';
+import { createAppContainer } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation-stack';
 
-export default class CameraExample extends React.Component {
+
+class MainScreen extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      image: require('./images/ImageNotAvailable.png'),
+      imageWidth: 225,
+      imageHeight: 300
+    }
+  }
+
+  render() {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>   
+        <Image
+          style={{width: this.state.imageWidth, height: this.state.imageHeight}}
+          source={this.state.image}
+        />
+        <Button
+          title="Take New Pic"
+          onPress={()=>{
+            this.props.navigation.navigate('Camera', {
+              mainScreen: this
+            })
+          }}
+        />
+      </View>
+    );
+  }
+}
+
+class CameraScreen extends React.Component {
 
   constructor(props) {
     super(props);
@@ -58,3 +93,16 @@ export default class CameraExample extends React.Component {
     }
   }
 }
+
+const AppNavigator = createStackNavigator(
+  {
+    Main: MainScreen,
+    Camera: CameraScreen,
+  },
+  {
+    initialRouteName: 'Main',
+  }
+);
+
+const AppContainer = createAppContainer(AppNavigator);
+export default AppContainer;

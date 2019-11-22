@@ -30,8 +30,16 @@ class MainScreen extends React.Component {
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore(); 
+    this.currentImageRef = db.doc('images/currentImage');
     const storage = firebase.storage();
     this.storageRef = storage.ref();
+
+    this.currentImageRef.get().then(docSnap => {
+      let currentImageURI = docSnap.data().imageURI;
+      if (typeof currentImageURI !== 'undefined') {
+        this.setState({image:  {uri: currentImageURI}});
+      }
+    });
   }
 
   updateImage = (imageObject) => {
@@ -57,7 +65,7 @@ class MainScreen extends React.Component {
       return uploadTaskSnapshot.ref.getDownloadURL();
     })
     .then(downloadURL => {
-      console.log('image saved to', downloadURL);
+      mainScreen.currentImageRef.set({imageURI: downloadURL});
     });
   }
 

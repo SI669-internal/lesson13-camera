@@ -18,6 +18,17 @@ class MainScreen extends React.Component {
     }
   }
 
+  updateImage = (imageObject) => {
+    let aspectRatio = imageObject.width / imageObject.height;
+    let w = 225;
+    let h = w / aspectRatio;
+    this.setState({
+      image: {uri: imageObject.uri},
+      imageWidth: w,
+      imageHeight: h
+    });
+  }
+
   render() {
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>   
@@ -52,6 +63,15 @@ class CameraScreen extends React.Component {
     Permissions.askAsync(Permissions.CAMERA).then(permStatus => {
       this.setState({ hasCameraPermission: permStatus.status === 'granted' });
     });
+
+  }
+
+  handleTakePicture = () => {
+    this.mainScreen = this.props.navigation.getParam('mainScreen');
+    this.camera.takePictureAsync().then((picData)=>{
+      this.mainScreen.updateImage(picData);
+      this.props.navigation.goBack();
+    })
   }
 
   render() {
@@ -63,7 +83,14 @@ class CameraScreen extends React.Component {
     } else {
       return (
         <View style={{ flex: 1 }}>
-          <Camera style={{ flex: 1 }} type={this.state.type}>
+          <Camera 
+            style={{ flex: 1 }} 
+            type={this.state.type}
+            ratio={'4:3'}
+            ref={cameraRef => {
+              this.camera = cameraRef;
+            }}
+          >
             <View
               style={{
                 flex: 1,
@@ -84,10 +111,16 @@ class CameraScreen extends React.Component {
                         : Camera.Constants.Type.back,
                   });
                 }}>
-                <Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}> Flip </Text>
+                <Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}> 
+                  Flip 
+                </Text>
               </TouchableOpacity>
             </View>
           </Camera>
+          <Button
+            title='Take Picture'
+            onPress={this.handleTakePicture}
+          />
         </View>
       );
     }

@@ -5,7 +5,18 @@ import * as Permissions from 'expo-permissions';
 import { Camera } from 'expo-camera';
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
+import firebase from 'firebase';
+import '@firebase/firestore';
 
+const firebaseConfig = {
+  apiKey: "AIzaSyCbh5Zqa7MkjC88FZ_-Hzj5RXr2VjVqgsA",
+  authDomain: "lesson13-camera.firebaseapp.com",
+  databaseURL: "https://lesson13-camera.firebaseio.com",
+  projectId: "lesson13-camera",
+  storageBucket: "lesson13-camera.appspot.com",
+  messagingSenderId: "5610370242",
+  appId: "1:5610370242:web:863d8f2cef511e876f375b"
+};
 
 class MainScreen extends React.Component {
   constructor(props) {
@@ -16,6 +27,11 @@ class MainScreen extends React.Component {
       imageWidth: 225,
       imageHeight: 300
     }
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(); 
+    const storage = firebase.storage();
+    this.storageRef = storage.ref();
   }
 
   updateImage = (imageObject) => {
@@ -26,6 +42,22 @@ class MainScreen extends React.Component {
       image: {uri: imageObject.uri},
       imageWidth: w,
       imageHeight: h
+    });
+
+    let mainScreen = this;
+    let uriParts = imageObject.uri.split('/');
+    let fname = uriParts[uriParts.length - 1];
+    fetch(imageObject.uri).then(response => {
+      return response.blob();
+    })
+    .then(blob => {
+      return mainScreen.storageRef.child(fname).put(blob);
+    })
+    .then(uploadTaskSnapshot => {
+      return uploadTaskSnapshot.ref.getDownloadURL();
+    })
+    .then(downloadURL => {
+      console.log('image saved to', downloadURL);
     });
   }
 
